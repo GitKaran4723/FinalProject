@@ -289,6 +289,8 @@ def segmentation_results():
     selected_columns = session['selected_columns']
     data = pd.read_json(StringIO(session['data']), orient='split')
 
+    print(selected_columns)
+
     # Process data using selected columns
     customer_data = data[selected_columns].select_dtypes(include=[float, int]).dropna()
     
@@ -301,6 +303,8 @@ def segmentation_results():
     
     # Apply K-means clustering
     customer_data['Cluster'] = kmeans.predict(customer_data_scaled)
+
+    print(customer_data.to_dict(orient='records'))
 
     return render_template('segmentation/results.html', data=customer_data.to_dict(orient='records'))
 
@@ -536,9 +540,9 @@ def login():
 from datetime import datetime
 @app.route('/save_chat', methods=['POST'])
 def save_chat():
-    print("saving chat...")
+    
     data = request.get_json()
-    print(data)
+    
 
     # Generate filename with current date and time
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -561,8 +565,7 @@ def save_chat():
 
 @app.route('/download_chat/<filename>', methods=['GET'])
 def download_chat(filename):
-    print("downloading chat...")
-    print(filename)
+    
     return send_from_directory('saved_chats', filename, as_attachment=True)
 
 
