@@ -1,0 +1,10 @@
+/* Add your CSS animation styles here */
+@keyframes wakeBounce {
+    0% { transform: translateY(100%); }
+    50% { transform: translateY(-10%); }
+    100% { transform: translateY(0); }
+}
+
+#wake-bounce {
+    animation: wakeBounce 1s ease-out forwards;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submission Successful</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .gif-container {
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 >Submission Successful!</h1>
+        <p>Thank you for submitting the form.</p>
+        <div class="gif-container">
+        </div>
+        
+    </div>
+    <script>
+        // Replace the current state in the history, effectively removing the form page from history
+        window.history.replaceState({}, document.title, "/");
+    </script>
+</body>
+</html>

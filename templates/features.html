@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="features">
+  <div class="features-content">
+    <h1>Our Features</h1>
+    <p>
+      Discover the powerful features of our AI-based customer data analysis service:
+    </p>
+    <div class="feature-list">
+      {% for feature in features %}
+        <div class="feature-card" style="background-color: {{ feature.color }}">
+          <h2>{{ feature.title }}</h2>
+          <p>{{ feature.description }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

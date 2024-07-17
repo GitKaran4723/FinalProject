@@ -1,0 +1,1 @@
+{"fields": [{"label": "Enter Full Name", "name": "name", "placeholder": "Enter your name", "type": "text", "value": ""}, {"label": "Enter USN", "name": "roll_number", "placeholder": "Enter your roll number", "type": "number", "value": ""}]}

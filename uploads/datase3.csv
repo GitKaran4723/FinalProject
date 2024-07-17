@@ -1,0 +1,9 @@
+InvoiceNo,StockCode,Description,Quantity,InvoiceDate,UnitPrice,CustomerID,Country
+A001,P001,Widget,10,2024-05-20 00:00:00,2.5,101,USA
+A002,P002,Gadget,15,2024-05-21 00:00:00,3.0,102,Canada
+A003,P003,Doohickey,7,2024-05-22 00:00:00,4.5,103,UK
+A004,P004,Thingamajig,20,2024-05-23 00:00:00,1.2,104,Germany
+A005,P005,Gizmo,12,2024-05-24 00:00:00,3.8,105,Australia
+A005,P005,Gizmo,70000,2024-05-24 00:00:00,15,105,Australia
+A005,P005,Gizmo,5000,2024-05-24 00:00:00,14,106,Australia
+A005,P005,Gizmo,300,2024-05-24 00:00:00,18,106,Australia

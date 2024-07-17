@@ -1,0 +1,12 @@
+Feedback_ID,Customer_Name,Rating,feedback,Date,Response_Status,sentiment,entities,issues
+1,John Doe,4,Good performance but battery life could be better,2024-06-20,Responded,0.7003,[],"['battery', 'performance']"
+2,Jane Smith,5,Excellent phone with great features,2024-06-21,Not Responded,0.8316,[],['features']
+3,Michael Brown,3,"Average experience, camera quality is poor",2024-06-22,Responded,-0.4767,[],['camera']
+4,Emily Davis,4,Nice design and user-friendly interface,2024-06-23,Not Responded,0.4215,[],[]
+5,David Wilson,2,Disappointed with the screen resolution,2024-06-24,Responded,-0.4767,[],['resolution']
+6,Sarah Miller,5,"Very satisfied with the purchase, i was taking a photo in america suddenly location cut off but product is good",2024-06-25,Not Responded,0.6538,['america'],['location']
+7,Chris Johnson,4,Good value for money,2024-06-26,Responded,0.6486,[],[]
+8,Amanda Martinez,3,"Mediocre performance, expected more",2024-06-27,Not Responded,0.0,[],['performance']
+9,Robert Garcia,5,Fantastic phone with excellent battery life,2024-06-28,Responded,0.8074,[],['battery']
+10,Laura Rodriguez,4,Great phone but lacks some features,2024-06-29,Not Responded,0.3716,[],['features']
+11,Karan Jadhav,2," ""The product is not that good as expected""",2024-06-20,Responded,-0.3412,[],['expectations']

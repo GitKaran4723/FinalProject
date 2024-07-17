@@ -1,0 +1,217 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-5">
+  <h3 class="mb-4 pt-4">Generate form for data collection</h3>
+  <form id="promptForm">
+    <div class="form-group">
+      <label for="prompt">Enter the details of the form:</label>
+      <input
+        type="text"
+        class="form-control"
+        id="prompt"
+        name="prompt"
+        value="{{ prompt }}"
+      />
+    </div>
+    <button type="submit" class="btn btn-primary" onclick="submitPrompt(event)">
+      Submit
+    </button>
+  </form>
+  <hr class="custom-hr" />
+  <div id="buffering" class="text-center" style="display: none">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+  <div id="formContainer"></div>
+  <hr class="custom-hr" />
+
+  <div id="previewContainer" class="mt-5"></div>
+</div>
+
+<script>
+  let formStructure = null;
+
+  function submitPrompt(event) {
+    event.preventDefault();
+    document.getElementById("formContainer").innerHTML = "";
+    document.getElementById("previewContainer").innerHTML = "";
+    const prompt = document.getElementById("prompt").value;
+    document.getElementById("buffering").style.display = "block";
+    fetch("/get-form-structure", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        document.getElementById("buffering").style.display = "none";
+        formStructure = data;
+        document.getElementById("formContainer").innerHTML = generateFormHTML(
+          formStructure.fields
+        );
+        previewForm();
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        document.getElementById("buffering").style.display = "none";
+      });
+  }
+
+  function generateFormHTML(fields) {
+    let formHTML = '<form id="dynamicForm" class="mt-4"><br><h4>Edit form</h4>';
+    fields.forEach((field, index) => {
+      formHTML +=
+        `
+                <div class="form-group" id="field-${index}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label contenteditable="true" onblur="updateField(${index}, 'label', this.textContent)" class="editable-label">${field.label}</label>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteField(${index})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>` +
+        `<div class="input-group mb-2">
+                        <input type="text" class="form-control" id="placeholder-${index}" value="${
+          field.placeholder
+        }" readonly>
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-outline-secondary" onclick="makeEditable(${index})">Edit</button>
+                            <button type="button" class="btn btn-outline-primary" onclick="savePlaceholder(${index})">Save</button>
+                        </div>
+                    </div>
+                    <select class="form-control mb-2" onchange="updateField(${index}, 'type', this.value)">
+                        <option value="text" ${
+                          field.type === "text" ? "selected" : ""
+                        }>Text</option>
+                        <option value="number" ${
+                          field.type === "number" ? "selected" : ""
+                        }>Number</option>
+                        <option value="email" ${
+                          field.type === "email" ? "selected" : ""
+                        }>Email</option>
+                        <option value="date" ${
+                          field.type === "date" ? "selected" : ""
+                        }>Date</option>
+                    </select>
+                </div>`;
+    });
+    formHTML += `
+            <button type="button" class="btn btn-success mt-3" onclick="addNewField()">
+                <i class="fas fa-plus-circle"></i> Add New Field
+            </button>
+            <button type="button" class="btn btn-info mt-3" onclick="previewForm()">
+                <i class="fas fa-eye"></i> Preview Form
+            </button>`;
+    formHTML += "</form>";
+    return formHTML;
+  }
+
+  function updateField(index, field, value) {
+    formStructure.fields[index][field] = value;
+    previewForm();
+  }
+
+  function makeEditable(index) {
+    const placeholderInput = document.getElementById(`placeholder-${index}`);
+    placeholderInput.readOnly = false;
+    placeholderInput.focus();
+  }
+
+  function savePlaceholder(index) {
+    const placeholderInput = document.getElementById(`placeholder-${index}`);
+    const value = placeholderInput.value;
+    updateField(index, "placeholder", value);
+    placeholderInput.readOnly = true;
+  }
+
+  function addNewField() {
+    const newField = {
+      label: "New Field",
+      type: "text",
+      name: `new_field_${formStructure.fields.length}`,
+      value: "",
+      placeholder: "Enter new field",
+    };
+    formStructure.fields.push(newField);
+    document.getElementById("formContainer").innerHTML = generateFormHTML(
+      formStructure.fields
+    );
+    previewForm();
+  }
+
+  function deleteField(index) {
+    formStructure.fields.splice(index, 1);
+    document.getElementById("formContainer").innerHTML = generateFormHTML(
+      formStructure.fields
+    );
+    previewForm();
+  }
+
+  function saveFormStructure() {
+    const filename = prompt(
+      "Please enter the filename to save the form structure:"
+    );
+
+    if (filename) {
+      const dataToSend = {
+        filename: filename,
+        formStructure: formStructure,
+      };
+
+      fetch("/save-form-structure", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(data.message);
+          window.location.href = '/my_forms'
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    } else {
+      alert("Filename is required to save the form structure.");
+    }
+  }
+
+  function previewForm() {
+    const formHTML = generateFormPreviewHTML(formStructure.fields);
+    document.getElementById("previewContainer").innerHTML = formHTML;
+  }
+
+  function generateFormPreviewHTML(fields) {
+    let formHTML =
+      '<form id="previewForm" class="mt-4"><br><h4>Form Preview</h4>';
+    fields.forEach((field) => {
+      formHTML += `
+                <div class="form-group">
+                    <label>${field.label}</label>
+                    <input type="${field.type}" class="form-control mb-2" name="${field.name}" placeholder="${field.placeholder}">
+                </div>`;
+    });
+    formHTML += `
+            <button type="button" class="btn btn-primary mt-3" onclick="saveFormStructure()">
+                <i class="fas fa-save"></i> Save Form
+            </button>`;
+    formHTML += "</form>";
+    return formHTML;
+  }
+</script>
+<style>
+  .editable-label {
+    border-bottom: 1px dashed #000;
+    cursor: text;
+  }
+  .editable-label:hover {
+    border-bottom: 1px solid #000;
+  }
+  .custom-hr {
+    border: 2px solid green;
+  }
+</style>
+{% endblock %}

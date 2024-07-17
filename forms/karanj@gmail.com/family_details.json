@@ -1,0 +1,1 @@
+{"fields": [{"label": "How many people are there in your family?", "name": "family_size", "placeholder": "Enter the number of people in your family", "type": "number", "value": ""}, {"label": "What do you do in the morning?", "name": "morning_routine", "placeholder": "Describe your morning routine", "type": "text", "value": ""}]}

@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="premium-upload-card text-center">
+    <h1 class="premium-upload-title">Analysis Results</h1>
+    <div id="results" style="margin-top: 20px;">
+        <!-- Feedback Details Table -->
+        <div id="table-container">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Feedback ID</th>
+                        <th scope="col">Customer Name</th>
+                        <th scope="col">Rating</th>
+                        <th scope="col">Feedback</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Response Status</th>
+                        <th scope="col">Sentiment</th>
+                        <th scope="col">Entities</th>
+                        <th scope="col">Issues</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+            <nav>
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- Pagination buttons will be populated by JavaScript -->
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Charts -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h3>Sentiment Analysis</h3>
+                <canvas id="sentiment-chart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <h3>Issue Distribution</h3>
+                <canvas id="issue-chart"></canvas>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Customer Satisfaction</h3>
+                <canvas id="satisfaction-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .premium-upload-card {
+        padding: 40px !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        background-color: #f8f9fa !important;
+        margin-top: 60px !important;
+    }
+    .premium-upload-title {
+        font-size: 2.5em !important;
+        margin-bottom: 20px !important;
+    }
+    #results .row {
+        margin-bottom: 20px;
+    }
+    canvas {
+        width: 100% !important;
+        height: 400px !important;
+    }
+    h3 {
+        margin-bottom: 20px;
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+    .tag {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+    }
+    .tag-positive {
+        color: #fff;
+        background-color: #28a745;
+    }
+    .tag-neutral {
+        color: #fff;
+        background-color: #ffc107;
+    }
+    .tag-negative {
+        color: #fff;
+        background-color: #dc3545;
+    }
+    .tag-issue {
+        color: #fff;
+        background-color: #17a2b8;
+    }
+</style>
+
+<!-- Include Chart.js library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const analysisData = {{ analysis_data | tojson }};
+        const feedbackData = {{ feedback_data | tojson }};
+        const rowsPerPage = 10;
+        let currentPage = 1;
+
+        // Function to render table rows
+        function renderTableRows(data, page = 1) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const rows = data.slice(start, end);
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            rows.forEach(row => {
+                const sentimentTag = getSentimentTag(row.sentiment);
+                const issuesTags = Array.isArray(row.issues) ? row.issues.map(issue => `<span class="tag tag-issue">${issue}</span>`).join(' ') : '';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.Feedback_ID}</td>
+                    <td>${row.Customer_Name}</td>
+                    <td>${row.Rating}</td>
+                    <td>${row.feedback}</td>
+                    <td>${row.Date}</td>
+                    <td>${row.Response_Status}</td>
+                    <td>${sentimentTag}</td>
+                    <td>${Array.isArray(row.entities) ? row.entities.join(', ') : ''}</td>
+                    <td>${issuesTags}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Function to get sentiment tag
+        function getSentimentTag(sentiment) {
+            if (sentiment > 0.1) {
+                return '<span class="tag tag-positive">Positive</span>';
+            } else if (sentiment < -0.1) {
+                return '<span class="tag tag-negative">Negative</span>';
+            } else {
+                return '<span class="tag tag-neutral">Neutral</span>';
+            }
+        }
+
+        // Function to render pagination
+        function renderPagination(totalRows) {
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.classList.add('page-item');
+            if (currentPage === 1) {
+                prevLi.classList.add('disabled');
+            }
+            prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>`;
+            prevLi.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTableRows(feedbackData, currentPage);
+                    renderPagination(feedbackData.length);
+                }
+            });
+            pagination.appendChild(prevLi);
+
+            // Page buttons
+            const maxPageButtons = 10;
+            let startPage = Math.max(currentPage - Math.floor(maxPageButtons / 2), 1);
+            let endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
+            if (endPage - startPage < maxPageButtons - 1) {
+                startPage = Math.max(endPage - maxPageButtons + 1, 1);
+            }
+
+            if (startPage > 1) {
+                const firstLi = document.createElement('li');
+                firstLi.classList.add('page-item');
+                firstLi.innerHTML = `<a class="page-link" href="#">1</a>`;
+                firstLi.addEventListener('click', () => {
+                    currentPage = 1;
+                    renderTableRows(feedbackData, currentPage);
+                    renderPagination(feedbackData.length);
+                });
+                pagination.appendChild(firstLi);
+
+                if (startPage > 2) {
+                    const dotsLi = document.createElement('li');
+                    dotsLi.classList.add('page-item', 'disabled');
+                    dotsLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+                    pagination.appendChild(dotsLi);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.classList.add('page-item');
+                if (i === currentPage) {
+                    li.classList.add('active');
+                }
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTableRows(feedbackData, currentPage);
+                    renderPagination(feedbackData.length);
+                });
+                pagination.appendChild(li);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dotsLi = document.createElement('li');
+                    dotsLi.classList.add('page-item', 'disabled');
+                    dotsLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+                    pagination.appendChild(dotsLi);
+                }
+
+                const lastLi = document.createElement('li');
+                lastLi.classList.add('page-item');
+                lastLi.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+                lastLi.addEventListener('click', () => {
+                    currentPage = totalPages;
+                    renderTableRows(feedbackData, currentPage);
+                    renderPagination(feedbackData.length);
+                });
+                pagination.appendChild(lastLi);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.classList.add('page-item');
+            if (currentPage === totalPages) {
+                nextLi.classList.add('disabled');
+            }
+            nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>`;
+            nextLi.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTableRows(feedbackData, currentPage);
+                    renderPagination(feedbackData.length);
+                }
+            });
+            pagination.appendChild(nextLi);
+        }
+
+        // Initial render
+        renderTableRows(feedbackData, currentPage);
+        renderPagination(feedbackData.length);
+
+        // Sentiment Chart
+        const sentimentCtx = document.getElementById('sentiment-chart').getContext('2d');
+        new Chart(sentimentCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Positive', 'Neutral', 'Negative'],
+                datasets: [{
+                    label: '# of Comments',
+                    data: [analysisData.sentiments.positive, analysisData.sentiments.neutral, analysisData.sentiments.negative],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(255, 99, 132, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Sentiment Analysis'
+                    }
+                }
+            }
+        });
+
+        // Issue Chart
+        const issueCtx = document.getElementById('issue-chart').getContext('2d');
+        new Chart(issueCtx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(analysisData.issues),
+                datasets: [{
+                    label: '# of Issues',
+                    data: Object.values(analysisData.issues),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Issue Distribution'
+                    }
+                }
+            }
+        });
+
+        // Customer Satisfaction Chart
+        const satisfactionCtx = document.getElementById('satisfaction-chart').getContext('2d');
+        new Chart(satisfactionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied'],
+                datasets: [{
+                    label: '# of Customers',
+                    data: [
+                        analysisData.satisfaction.very_satisfied, 
+                        analysisData.satisfaction.satisfied, 
+                        analysisData.satisfaction.neutral, 
+                        analysisData.satisfaction.dissatisfied, 
+                        analysisData.satisfaction.very_dissatisfied
+                    ],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Customer Satisfaction'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

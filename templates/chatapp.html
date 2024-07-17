@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel='stylesheet' href='{{ url_for('static', filename='css/markdown.css') }}'>
+    <style>
+        .chatapp-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-size: cover;
+            background-image: url('{{ url_for('static', filename='assets/chat-icon.webp') }}');
+            background-color: #0084FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .chatapp-window {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 400px;
+            height: 500px;
+            background-color: #2B2B2B;
+            border: 1px solid #3A3A3A;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 10000;
+            transition: width 0.3s, height 0.3s;
+        }
+        .chatapp-window.large {
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+            right: 0;
+        }
+        @media (max-width: 768px) {
+            .chatapp-window {
+                width: 100%;
+                height: 90%;
+                bottom: 60px;
+                right: 0;
+                border-radius: 0;
+            }
+            .chatapp-window.large {
+                width: 100%;
+                height: 95%;
+                bottom: 30px;
+            }
+        }
+        .chatapp-header {
+            background-color: #3A3A3A;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chatapp-body {
+            padding: 10px;
+            flex: 1;
+            height: 70%;
+            overflow-y: auto;
+            background-color: #2B2B2B;
+        }
+        .chatapp-input {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-top: 1px solid #3A3A3A;
+            background-color: #2B2B2B;
+        }
+        .chatapp-save {
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            border-top: 1px solid #3A3A3A;
+            background-color: #2B2B2B;
+        }
+        .chatapp-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .chatapp-user-message {
+            background-color: #4A90E2;
+            border: 1px solid #5BC0DE;
+            color: #FFFFFF;
+        }
+        .chatapp-bot-message {
+            background-color: #444;
+            border: 1px solid #3A3A3A;
+            color: #FFFFFF;
+        }
+        .chatapp-markdown-body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            line-height: 1.5;
+            padding: 10px;
+        }
+        .chatapp-form-control, .chatapp-btn {
+            border-radius: 10px;
+            padding-left: 5px;
+            width: 100%;
+        }
+        .chatapp-form-control {
+            background-color: #3A3A3A;
+            color: #FFFFFF;
+            border: 1px solid #5BC0DE;
+        }
+        .chatapp-btn-primary {
+            padding:10px;
+            background-color: #0084FF;
+            border-color: #0084FF;
+        }
+        .chatapp-btn-secondary {
+            background-color: #555;
+            border-color: #555;
+        }
+        .chatapp-toggle-size {
+            cursor: pointer;
+            color: #ffffff;
+            font-size: 1.2em;
+        }
+
+    </style>
+</head>
+<body>
+    <button class="chatapp-button" id="openChatButton" onclick="toggleChat()">💬</button>
+    <div class="chatapp-window" id="chatWindow" style="display: none;">
+        <div class="chatapp-header">
+            Ask me anything - Powered by AI
+            <span class="chatapp-toggle-size" onclick="toggleSize()">⛶</span>
+        </div>
+        <div class="chatapp-body" id="chatBody">
+            <!-- Initial instructions -->
+            <div class="chatapp-message chatapp-bot-message">
+                You can type <code>/explain</code> to get an explanation of the current page.
+            </div>
+            <div class="chatapp-message chatapp-bot-message">
+                Feel free to ask any question!
+            </div>
+        </div>
+        <div class="chatapp-input">
+            <input type="text" class="chatapp-form-control" placeholder="Type your message..." id="chatInput" onkeypress="handleKeyPress(event)">
+            <div class="input-group-append">
+                <button class="chatapp-btn chatapp-btn-primary ml-2" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        <div class="chatapp-save">
+            <button class="chatapp-btn chatapp-btn-secondary" onclick="saveChat()">Save Chat</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="{{ url_for('static', filename='js/markdown.js') }}"></script>
+
+    <script>
+        // mark down content used here
+        var md = window.markdownit();
+
+        let open = false;
+        let messages = [];
+        let instructionsVisible = true;
+
+        function toggleChat() {
+            open = !open;
+            document.getElementById('chatWindow').style.display = open ? 'block' : 'none';
+        }
+
+        function toggleSize() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.toggle('large');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value;
+            if (message.trim()) {
+                if (instructionsVisible) {
+                    clearInstructions();
+                    instructionsVisible = false;
+                }
+                addMessage('user', message);
+                if (message.trim().includes('/explain')) {
+                    sendExplainRequest(message);
+                } else {
+                    sendApiRequest(message);
+                }
+                input.value = '';
+            }
+        }
+
+        function sendApiRequest(message) {
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                data = md.render(data.response);
+                addMessage('bot', data); // Access the 'response' field from the returned JSON
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('bot', 'Error: Unable to fetch response.');
+            });            
+        }
+
+        function sendExplainRequest(message) {
+            const mainContent = document.querySelector('main').innerHTML;
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt: message, content: mainContent })
+            })
+            .then(response => response.json())
+            .then(data => {
+                data = md.render(data.response);
+                addMessage('bot', data); // Assuming data contains a 'response' field
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('bot', 'Error: Unable to fetch response.');
+            });
+        }
+
+        function addMessage(role, content) {
+            messages.push({ role, content });
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chatapp-message chatapp-${role}-message chatapp-markdown-body`;
+            messageDiv.innerHTML = (role === 'user' ? 'You: ' : '') + content;
+            document.getElementById('chatBody').appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearInstructions() {
+            const chatBody = document.getElementById('chatBody');
+            chatBody.innerHTML = '';
+        }
+
+        function saveChat() {
+            
+            fetch('/save_chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ messages })
+            })
+            .then(response => response.json())
+            .then(data => {
+                
+                const filename = data.filename;
+                const url = `/download_chat/${filename}`;
+                // Create a link element, set the download attribute and click it
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>

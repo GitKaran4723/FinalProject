@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-container mt-8">
+    <h1 class="mb-4 text-center">Welcome </h1>
+    {% if company %}
+        <div class="alert alert-success text-center" role="alert">
+            Hello, <strong>{{ company }}</strong>! You are logged in.
+        </div>
+    {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            You are not logged in. Please <a href="{{ url_for('login') }}" class="alert-link">login</a>.
+        </div>
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title">Data Collection</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">The Data Collection module allows you to create and manage forms to collect data from various sources. It supports dynamic form generation based on user input.</p>
+                    <a href="{{ url_for('data_collection') }}" class="btn btn-primary">Go to Data Collection</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title">Segmentation</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">The Segmentation module helps you to segment your data into meaningful groups. It provides tools and techniques for effective data segmentation.</p>
+                    <a href="{{ url_for('segmentation') }}" class="btn btn-primary">Go to Segmentation</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title">Trend Detection</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">The Trend Detection module allows you to analyze data trends over time. It provides insights into patterns and helps in forecasting future trends.</p>
+                    <a href="{{ url_for('trend_detection') }}" class="btn btn-primary">Go to Trend Detection</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title">Sentiment Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">The Sentiment Analysis module enables you to analyze the sentiment of textual data. It helps in understanding the mood and opinions expressed in the data.</p>
+                    <a href="{{ url_for('sentiment_analysis') }}" class="btn btn-primary">Go to Sentiment Analysis</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

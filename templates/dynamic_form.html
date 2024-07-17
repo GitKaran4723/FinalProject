@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Form</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .container {
+        margin-top: 20px;
+      }
+      .form-preview-content {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Please fill the following form</h1>
+      <div class="form-preview-content">
+        <form id="dynamicForm" action="/submit-form" method="POST">
+          {% for field in form_data.fields %}
+          <div class="form-group">
+            <label>{{ field.label }}</label>
+            <input
+              type="{{ field.type }}"
+              class="form-control"
+              name="{{ field.name }}"
+              placeholder="{{ field.placeholder }}"
+            />
+          </div>
+          {% endfor %}
+          <input type="hidden" name="user_name" value="{{ user_name }}" />
+          <input type="hidden" name="form_name" value="{{ form_name }}" />
+          <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

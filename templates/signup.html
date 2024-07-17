@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="signup-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="popup-container">
+                {% for category, message in messages %}
+                    <div class="popup {{ category }}">
+                        <span>{{ message }}</span>
+                        <button class="close-popup" onclick="this.parentElement.style.display='none';">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <div class="signup-form">
+        <h2>Sign Up</h2>
+        <form method="POST" id="signupForm">
+            <div class="form-group">
+                <label for="company" class="form-label">Company Name</label>
+                <input type="text" class="form-control" id="company" name="company" required />
+            </div>
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required />
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required />
+                <div id="passwordStrengthMessage" class="text-danger mt-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required />
+                <div id="passwordMatchMessage" class="text-danger mt-1"></div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" id="submitBtn">Sign Up</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const passwordMatchMessage = document.getElementById('passwordMatchMessage');
+        const passwordStrengthMessage = document.getElementById('passwordStrengthMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const signupForm = document.getElementById('signupForm');
+
+        function checkPasswordMatch() {
+            if (password.value !== confirmPassword.value) {
+                passwordMatchMessage.textContent = 'Passwords do not match';
+                submitBtn.disabled = true;
+            } else {
+                passwordMatchMessage.textContent = '';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function checkPasswordStrength() {
+            const value = password.value;
+            let strength = 0;
+            let messages = [];
+
+            const hasUpperCase = /[A-Z]/.test(value);
+            const hasLowerCase = /[a-z]/.test(value);
+            const hasNumbers = /[0-9]/.test(value);
+            const hasSymbols = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+            const isLongEnough = value.length >= 8;
+
+            if (hasUpperCase) strength += 1;
+            else messages.push('At least one uppercase letter');
+
+            if (hasLowerCase) strength += 1;
+            else messages.push('At least one lowercase letter');
+
+            if (hasNumbers) strength += 1;
+            else messages.push('At least one number');
+
+            if (hasSymbols) strength += 1;
+            else messages.push('At least one symbol');
+
+            if (isLongEnough) strength += 1;
+            else messages.push('At least 8 characters');
+
+            passwordStrengthMessage.textContent = messages.join(', ');
+
+            // Change the color based on the strength
+            if (strength === 5) {
+                passwordStrengthMessage.classList.remove('text-danger');
+                passwordStrengthMessage.classList.add('text-success');
+                passwordStrengthMessage.textContent = 'Strong password';
+                return true;
+            } else {
+                passwordStrengthMessage.classList.remove('text-success');
+                passwordStrengthMessage.classList.add('text-danger');
+                return false;
+            }
+        }
+
+        password.addEventListener('input', function() {
+            checkPasswordStrength();
+            checkPasswordMatch();
+        });
+        confirmPassword.addEventListener('input', checkPasswordMatch);
+
+        signupForm.addEventListener('submit', function(event) {
+            if (!checkPasswordStrength()) {
+                event.preventDefault();
+                alert('Please enter a strong password.');
+            }
+        });
+    });
+</script>
+{% endblock %}

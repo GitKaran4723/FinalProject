@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="premium-upload-card text-center">
+    <h1 class="premium-upload-title">Analysis</h1>
+    <p class="premium-upload-instructions">
+        Please upload a preprocessed CSV file. The file will be analyzed for segmentation based on selected columns.
+    </p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="alert alert-dismissible fade show mt-3" role="alert">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <form method="post" enctype="multipart/form-data" class="premium-upload-form mx-auto mt-4" style="max-width: 500px;" action="{{ url_for('segmentation_index') }}">
+        <div class="form-group mb-3">
+            <label class="premium-upload-label form-label" for="file">Upload your file (CSV only)</label>
+            <input type="file" class="form-control premium-upload-input" id="file" name="file" accept=".csv" required onchange="validateFile()">
+        </div>
+        <button type="submit" class="btn premium-upload-button btn-primary btn-sm w-100">Upload and Analyze</button>
+    </form>
+</div>
+
+<style>
+    .premium-upload-card {
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #f8f9fa;
+        margin-top: 60px;
+    }
+    .premium-upload-title {
+        font-size: 2.5em;
+        margin-bottom: 20px;
+    }
+    .premium-upload-instructions {
+        margin-bottom: 30px;
+        font-size: 1.2em;
+    }
+    .premium-upload-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .premium-upload-label {
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #495057;
+    }
+    .premium-upload-input {
+        margin-bottom: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+    }
+    .premium-upload-button {
+        padding: 10px 15px;
+        border-radius: 5px;
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+        transition: background-color 0.3s ease;
+    }
+    .premium-upload-button:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+</style>
+
+<script>
+    function validateFile() {
+        const fileInput = document.getElementById('file');
+        const file = fileInput.files[0];
+        if (file && file.name.startsWith('processed_')) {
+            return true;
+        } else {
+            alert('Please upload a preprocessed file.');
+            fileInput.value = '';
+            return false;
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="faq">
+    <div class="faq-content">
+        <h1>Frequently Asked Questions</h1>
+        <p>Find answers to the most common questions about our service.</p>
+
+        <div class="faq-item" onclick="toggleFaqItem(this)">
+            <h2>What is the purpose of this application?</h2>
+            <p>This application uses AI to analyze customer data, providing insights that help businesses understand and meet their customers' needs effectively.</p>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaqItem(this)">
+            <h2>How do I sign up for the service?</h2>
+            <p>You can sign up for the service by clicking the "Signup" button on the homepage and filling out the registration form.</p>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaqItem(this)">
+            <h2>What pricing plans are available?</h2>
+            <p>We offer three pricing plans: Basic, Pro, and Enterprise. Each plan offers different features to suit various business needs. Please visit our Pricing page for more details.</p>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaqItem(this)">
+            <h2>How can I contact support?</h2>
+            <p>If you need assistance, you can contact our support team via email or phone. Our contact information is available on the Contact Us page.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleFaqItem(element) {
+        element.classList.toggle('active');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,1 @@
+{"fields": [{"label": "Name", "name": "email", "placeholder": "Enter your email", "type": "text", "value": ""}, {"label": "Feedback", "name": "feedback", "placeholder": "Provide your feedback here", "type": "text", "value": ""}]}

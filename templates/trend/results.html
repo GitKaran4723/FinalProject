@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+        <div class="card-body text-center">
+            <h1 class="card-title">Trend Detection Results</h1>
+            <p class="card-text">Below are the results of the trend detection analysis.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+        <div class="card-body">
+            <h2 class="card-title">Tabular View</h2>
+            <div style="overflow-x: auto;">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            {% for col in data[0].keys() %}
+                                <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <nav>
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- Pagination buttons will be populated by JavaScript -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+                <div class="card-body">
+                    <h2 class="card-title">Trend Over Time - Line Chart</h2>
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+                <div class="card-body">
+                    <h2 class="card-title">Trend Distribution - Pie Chart</h2>
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ensure Chart.js is loaded -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const rows = {{ data | tojson }};
+        const rowsPerPage = 10;
+        let currentPage = 1;
+
+        function renderTableRows(data, page = 1) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedRows = data.slice(start, end);
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            paginatedRows.forEach(row => {
+                const tr = document.createElement('tr');
+                Object.values(row).forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value !== null ? value : 'N/A';
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function renderPagination(totalRows) {
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.classList.add('page-item');
+            if (currentPage === 1) {
+                prevLi.classList.add('disabled');
+            }
+            prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>`;
+            prevLi.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTableRows(rows, currentPage);
+                    renderPagination(rows.length);
+                }
+            });
+            pagination.appendChild(prevLi);
+
+            // Page buttons
+            const maxPageButtons = 10;
+            let startPage = Math.max(currentPage - Math.floor(maxPageButtons / 2), 1);
+            let endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
+            if (endPage - startPage < maxPageButtons - 1) {
+                startPage = Math.max(endPage - maxPageButtons + 1, 1);
+            }
+
+            if (startPage > 1) {
+                const firstLi = document.createElement('li');
+                firstLi.classList.add('page-item');
+                firstLi.innerHTML = `<a class="page-link" href="#">1</a>`;
+                firstLi.addEventListener('click', () => {
+                    currentPage = 1;
+                    renderTableRows(rows, currentPage);
+                    renderPagination(rows.length);
+                });
+                pagination.appendChild(firstLi);
+
+                if (startPage > 2) {
+                    const dotsLi = document.createElement('li');
+                    dotsLi.classList.add('page-item', 'disabled');
+                    dotsLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+                    pagination.appendChild(dotsLi);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.classList.add('page-item');
+                if (i === currentPage) {
+                    li.classList.add('active');
+                }
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTableRows(rows, currentPage);
+                    renderPagination(rows.length);
+                });
+                pagination.appendChild(li);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dotsLi = document.createElement('li');
+                    dotsLi.classList.add('page-item', 'disabled');
+                    dotsLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+                    pagination.appendChild(dotsLi);
+                }
+
+                const lastLi = document.createElement('li');
+                lastLi.classList.add('page-item');
+                lastLi.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+                lastLi.addEventListener('click', () => {
+                    currentPage = totalPages;
+                    renderTableRows(rows, currentPage);
+                    renderPagination(rows.length);
+                });
+                pagination.appendChild(lastLi);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.classList.add('page-item');
+            if (currentPage === totalPages) {
+                nextLi.classList.add('disabled');
+            }
+            nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>`;
+            nextLi.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTableRows(rows, currentPage);
+                    renderPagination(rows.length);
+                }
+            });
+            pagination.appendChild(nextLi);
+        }
+
+        // Initial render
+        renderTableRows(rows, currentPage);
+        renderPagination(rows.length);
+
+        var ctxLine = document.getElementById('lineChart').getContext('2d');
+        var ctxPie = document.getElementById('pieChart').getContext('2d');
+
+        var trendData = rows.map(row => ({
+            x: row.Date,
+            y: row.TotalSales_trend
+        }));
+
+        var lineData = {
+            labels: trendData.map(d => d.x),
+            datasets: [{
+                label: 'Trend Over Time',
+                data: trendData.map(d => d.y),
+                fill: false,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                tension: 0.1
+            }]
+        };
+
+        var pieData = {
+            labels: ['TotalSales', 'NumTransactions', 'AvgTransactionValue'],
+            datasets: [{
+                data: [rows[rows.length - 1].TotalSales, rows[rows.length - 1].NumTransactions, rows[rows.length - 1].AvgTransactionValue],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        new Chart(ctxLine, {
+            type: 'line',
+            data: lineData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Trend Over Time' }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'month'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        }
+                    }
+                }
+            }
+        });
+
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: pieData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Trend Distribution' }
+                }
+            }
+        });
+    });
+</script>
+
+<style>
+    .card {
+        margin-bottom: 20px;
+    }
+    .card-title {
+        font-size: 1.75rem;
+        margin-bottom: 20px;
+    }
+    .table {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="premium-upload-card">
+    <h1 class="premium-upload-title">Preprocessor</h1>
+    <p class="premium-upload-instructions">
+        Please upload your CSV file to check its compatibility. The file should contain columns such as 'customer_id', 'feedback', and 'date'. 
+        After preprocessing, the file will have additional columns like sentiment scores, named entities, and identified issues.
+    </p>
+    <form method="post" enctype="multipart/form-data" class="premium-upload-form" id="uploadForm">
+        <div class="form-group">
+            <label class="premium-upload-label">Upload your file (CSV only)</label>
+            <input type="file" class="form-control-file premium-upload-input" id="file" name="file" accept=".csv" required onchange="validateFile()">
+        </div>
+        <button type="submit" class="btn premium-upload-button btn-sm" id="submitButton">Upload and Preprocess</button>
+    </form>
+
+    <div id="buffering" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Processing...</span>
+        </div>
+        <p>Processing...</p>
+    </div>
+
+    {% if new_columns %}
+    <div class="form-group" style="margin-top: 20px;" id="newColumnsSection">
+        <label class="premium-upload-label">New Column Names After Preprocessing</label>
+        <textarea class="form-control premium-upload-input" rows="3" readonly>{{ new_columns | join(', ') }}</textarea>
+        <a href="{{ url_for('download_file', filename='processed_' + file_name) }}" class="btn btn-success btn-sm" style="margin-top: 10px;">Download Processed File</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .premium-upload-card {
+        padding: 20px !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+        background-color: white !important;
+        margin-top: 60px !important;
+    }
+    .premium-upload-title {
+        font-size: 2em !important;
+        margin-bottom: 20px !important;
+    }
+    .premium-upload-instructions {
+        margin-bottom: 20px !important;
+        font-size: 1.1em !important;
+    }
+    .premium-upload-form {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    .premium-upload-label {
+        margin-bottom: 10px !important;
+        font-weight: bold !important;
+    }
+    .premium-upload-input, .premium-upload-select {
+        margin-bottom: 20px !important;
+    }
+    .premium-upload-button {
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+        color: white !important;
+        transition: background-color 0.3s ease !important;
+    }
+    .premium-upload-button:hover {
+        background-color: #0056b3 !important;
+        border-color: #0056b3 !important;
+    }
+</style>
+
+<script>
+    function validateFile() {
+        const fileInput = document.getElementById('file');
+        const file = fileInput.files[0];
+        if (file && file.type === 'text/csv') {
+            document.getElementById('wizard').style.display = 'block';
+        } else {
+            alert('Please upload a CSV file.');
+            fileInput.value = '';
+        }
+    }
+
+    document.getElementById('uploadForm').onsubmit = function () {
+        document.getElementById('newColumnsSection').innerHTML = '';
+        document.getElementById('buffering').style.display = 'block';
+        document.getElementById('submitButton').style.display = 'none';
+    }
+</script>
+{% endblock %}

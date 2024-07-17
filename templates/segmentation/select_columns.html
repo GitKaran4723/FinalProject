@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="premium-upload-card">
+    <h1 class="premium-upload-title">Select Columns for Segmentation</h1>
+    <form method="post">
+        <div class="form-group">
+            {% for column in columns %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="columns" value="{{ column }}" id="{{ column }}">
+                    <label class="form-check-label" for="{{ column }}">
+                        {{ column }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn premium-upload-button btn-primary">Segment</button>
+    </form>
+</div>
+
+<style>
+    .premium-upload-card {
+        padding: 20px !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+        background-color: white !important;
+        margin-top: 60px !important;
+    }
+    .premium-upload-title {
+        font-size: 2em !important;
+        margin-bottom: 20px !important;
+    }
+    .premium-upload-form {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    .premium-upload-button {
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+        color: white !important;
+        transition: background-color 0.3s ease !important;
+    }
+    .premium-upload-button:hover {
+        background-color: #0056b3 !important;
+        border-color: #0056b3 !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,1 @@
+{"fields":[{"label":"Name","type":"text","name":"name","value":"","placeholder":"Enter your name"},{"label":"Email","type":"email","name":"email","value":"","placeholder":"Enter your email"},{"label":"Age","type":"number","name":"age","value":"","placeholder":"Enter your age"}]}

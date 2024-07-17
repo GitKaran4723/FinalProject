@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Analyze</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .homepage {
+            background-image: url("{{ url_for('static', filename='assets/home.webp') }}");
+            background-size: cover;
+            background-position: center;
+            height: 95vh;
+            color: white;
+        }
+        .home_container {
+            text-align: center;
+            padding: 50px;
+            background-color: rgba(0, 0, 0, 0.5);
+            margin: auto;
+            max-width: 800px;
+        }
+        .carousel {
+            height: 30vh;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .carousel-card {
+            color: black;
+            display: none;
+            position: absolute;
+            width: 100%;
+            transition: opacity 1s;
+        }
+        .carousel-card.active {
+            display: block;
+            opacity: 1;
+        }
+        .carousel-card.prev, .carousel-card.next {
+            opacity: 0;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            height: 300px;
+            border-radius: 10px;
+        }
+        .card-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .card-text {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="homepage">
+        <div class="home_container">
+            <h1 class="text-center py-2">Welcome to Our Customer Feedback Analysis Application</h1>
+            <p class="text-center mb-5">Unlock the power of your customer feedback with our advanced generative AI-driven platform.</p>
+
+            <div class="carousel">
+                <div class="carousel-card active">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Segmentation</h2>
+                            <p class="card-text">Analyze and segment your customer feedback to understand different customer groups and their unique needs.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Sentiment Analysis</h2>
+                            <p class="card-text">Utilize advanced sentiment analysis to gauge the emotions and opinions expressed in customer feedback.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Trend Detection</h2>
+                            <p class="card-text">Identify emerging trends and patterns in customer feedback to stay ahead of the curve.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Data Collection and Integration</h2>
+                            <p class="card-text">Seamlessly collect and integrate feedback from various sources for a comprehensive view.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let currentCard = 0;
+            const cards = document.querySelectorAll('.carousel-card');
+
+            function showNextCard() {
+                cards[currentCard].classList.remove('active');
+                currentCard = (currentCard + 1) % cards.length;
+                cards[currentCard].classList.add('active');
+            }
+
+            setInterval(showNextCard, 3000);
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
