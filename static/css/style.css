@@ -129,3 +129,6 @@ main {
     padding: 0;
     height: 10vh;
 }
+.hidden{
+    display: none !important;
+}

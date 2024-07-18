@@ -228,6 +228,7 @@ def trend_select_columns():
 def trend_results():
     selected_columns = session['selected_columns']
     data = pd.read_json(session['data'], orient='split')
+    print(data)
     trend_data = trend_analysis.detect_trends(data, selected_columns)
     return render_template('trend/results.html', data=trend_data.to_dict(orient='records'))
 

@@ -26,7 +26,6 @@
     <div class="form-group" style="margin-top: 20px;" id="newColumnsSection">
         <label class="premium-upload-label">New Column Names After Preprocessing</label>
         <textarea class="form-control premium-upload-input" rows="3" readonly>{{ new_columns | join(', ') }}</textarea>
-        <a href="{{ url_for('download_file', filename='processed_' + file_name) }}" class="btn btn-success btn-sm" style="margin-top: 10px;">Download Processed File</a>
         <a href="{{ url_for('segmentation_select_columns') }}" class="btn btn-primary btn-sm" style="margin-top: 10px;">Select Columns for Segmentation</a>
     </div>
     {% endif %}

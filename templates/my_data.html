@@ -32,10 +32,10 @@
                 const fileList = document.getElementById('fileList');
 
                 console.log(data.datas)
-                if (data.datas.length === 0) {
+                if (data.datas === undefined || data.datas.length === 0) {
                     const listItem = document.createElement('li');
                     listItem.className = 'no-files-found';
-                    listItem.innerText = 'No files found';
+                    listItem.innerText = 'No Data found';
                     fileList.appendChild(listItem);
                     return;
                 }

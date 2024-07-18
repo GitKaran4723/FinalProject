@@ -58,6 +58,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const rows = {{ data | tojson }};
+
+        console.log(rows);
         const rowsPerPage = 10;
         let currentPage = 1;
 
@@ -201,9 +203,11 @@
         var ctxPie = document.getElementById('pieChart').getContext('2d');
 
         var trendData = rows.map(row => ({
-            x: row.Date,
+            x: row.Date.split(' ')[1] + ' ' + row.Date.split(' ')[2] + ' ' + row.Date.split(' ')[3], // Extract date
             y: row.TotalSales_trend
         }));
+
+        console.log(trendData);
 
         var lineData = {
             labels: trendData.map(d => d.x),
@@ -217,6 +221,7 @@
             }]
         };
 
+    
         var pieData = {
             labels: ['TotalSales', 'NumTransactions', 'AvgTransactionValue'],
             datasets: [{
@@ -246,10 +251,6 @@
                 },
                 scales: {
                     x: {
-                        type: 'time',
-                        time: {
-                            unit: 'month'
-                        },
                         title: {
                             display: true,
                             text: 'Date'
