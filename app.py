@@ -191,6 +191,7 @@ def analysis_results():
     return render_template('sentiment_analysis/results.html', analysis_data=analysis_data, feedback_data=feedback_data)
 
 @app.route('/uploads/<filename>')
+@login_required
 def download_file(filename):
     return send_from_directory(PROCESSED_FOLDER, filename)
 
@@ -202,6 +203,7 @@ def trend_detection():
     return render_template('trend_detection.html')
 
 @app.route('/trend', methods=['GET', 'POST'])
+@login_required
 def trend_preprocess():
     if request.method == 'POST':
         file = request.files['file']
@@ -216,6 +218,7 @@ def trend_preprocess():
     return render_template('trend/preprocessor.html')
 
 @app.route('/trend/select_columns', methods=['GET', 'POST'])
+@login_required
 def trend_select_columns():
     data = pd.read_json(session['data'], orient='split')
     if request.method == 'POST':
@@ -225,6 +228,7 @@ def trend_select_columns():
     return render_template('trend/select_columns.html', columns=data.columns.tolist())
 
 @app.route('/trend/results', methods=['GET'])
+@login_required
 def trend_results():
     selected_columns = session['selected_columns']
     data = pd.read_json(session['data'], orient='split')
@@ -233,6 +237,7 @@ def trend_results():
     return render_template('trend/results.html', data=trend_data.to_dict(orient='records'))
 
 @app.route('/trend_uploads/<filename>')
+@login_required
 def download_file_trend(filename):
     return send_from_directory(app.config['TREND_UPLOAD_FOLDER'], filename)
 
@@ -245,6 +250,7 @@ def segmentation():
     return render_template('segmentation.html')
 
 @app.route('/segmentation/preprocess', methods=['GET', 'POST'])
+@login_required
 def segmentation_preprocess():
     print("segmentation_preprocess")
     if request.method == 'POST':
@@ -286,6 +292,7 @@ def segmentation_select_columns():
     return render_template('segmentation/select_columns.html', columns=data.columns.tolist())
 
 @app.route('/segmentation/results', methods=['GET'])
+@login_required
 def segmentation_results():
     selected_columns = session['selected_columns']
     data = pd.read_json(StringIO(session['data']), orient='split')
