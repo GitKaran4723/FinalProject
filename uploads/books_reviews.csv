@@ -1,4 +1,4 @@
-Feedback_ID,Customer_Name,Rating,feedback,Date,Response_Status
+Feedback_ID,name,Rating,feedback,Date,Response_Status
 1,Anna Lee,5,"Captivating story and well-developed characters",2024-06-20,Responded
 2,Mark Taylor,3,"Interesting plot but slow-paced",2024-06-21,Not Responded
 3,Paul Wilson,4,"Great book with valuable insights",2024-06-22,Responded

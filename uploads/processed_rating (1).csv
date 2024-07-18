@@ -1,0 +1,4 @@
+name,feedback,Rating,sentiment,entities,issues
+Karan Sambhaji Jadhav,this product is very very good. i like it,3,0.7589,[],[]
+jo,I am not able to feed data intot the file,3,0.0,[],['data_feeding_issue']
+John Doe,I am not able to feed data intot the file,2,0.0,[],['data_feeding_issue']

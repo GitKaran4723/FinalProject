@@ -1,0 +1,4 @@
+name,feedback,sentiment,entities,issues
+Karan Sambhaji Jadhav,"this product is good, i really like this so much",0.6901,[],['quality']
+John Doe,i hate this because i find very low quality product,-0.7264,[],['quality']
+shivaji,"i am in america but this finds well, and i want to use this all the time",0.4767,['america'],"['location', 'usage']"

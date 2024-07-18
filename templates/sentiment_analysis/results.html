@@ -9,12 +9,12 @@
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-                        <th scope="col">Feedback ID</th>
+                        
                         <th scope="col">Customer Name</th>
                         <th scope="col">Rating</th>
                         <th scope="col">Feedback</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Response Status</th>
+                        
+                        
                         <th scope="col">Sentiment</th>
                         <th scope="col">Entities</th>
                         <th scope="col">Issues</th>
@@ -115,6 +115,9 @@
         const rowsPerPage = 10;
         let currentPage = 1;
 
+        console.log("analysis",analysisData);
+        console.log("feedback",feedbackData);
+
         // Function to render table rows
         function renderTableRows(data, page = 1) {
             const start = (page - 1) * rowsPerPage;
@@ -127,12 +130,12 @@
                 const issuesTags = Array.isArray(row.issues) ? row.issues.map(issue => `<span class="tag tag-issue">${issue}</span>`).join(' ') : '';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${row.Feedback_ID}</td>
-                    <td>${row.Customer_Name}</td>
+                    
+                    <td>${row.name}</td>
                     <td>${row.Rating}</td>
                     <td>${row.feedback}</td>
-                    <td>${row.Date}</td>
-                    <td>${row.Response_Status}</td>
+                    
+                    
                     <td>${sentimentTag}</td>
                     <td>${Array.isArray(row.entities) ? row.entities.join(', ') : ''}</td>
                     <td>${issuesTags}</td>

@@ -131,7 +131,7 @@ def sentiment_analysis_analysis():
             file.save(filepath)
             df = pd.read_csv(filepath)
 
-            required_columns = ['Feedback_ID', 'Customer_Name', 'Rating', 'feedback', 'Date', 'Response_Status', 'sentiment', 'entities', 'issues']
+            required_columns = ['feedback', 'sentiment', 'entities', 'issues']
             missing_columns = [col for col in required_columns if col not in df.columns]
 
             if missing_columns:
